@@ -24,10 +24,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Dependencies & Generate Android Project
+      - name: Prepare Web Directory & Dependencies
         run: |
           npm install
-          npx cap init "Naol SMS" "com.naol.smsforwarder" --web-dir .
+          # Ensure 'www' folder exists and index.html is placed inside it
+          mkdir -p www
+          if [ -f "index.html" ]; then
+            cp index.html www/index.html
+          fi
+          # Initialize Capacitor with valid 'www' web directory
+          npx cap init "Naol SMS" "com.naol.smsforwarder" --web-dir www
           npx cap add android
 
       - name: Sync Android
