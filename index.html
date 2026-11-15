@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Edit Webhook</title>
+  <title>SMS Forwarder</title>
   <style>
     * {
       box-sizing: border-box;
@@ -14,86 +14,145 @@
     body {
       margin: 0;
       padding: 16px;
-      background-color: #f3f4f6;
-      color: #111827;
+      background-color: #f1f5f9;
+      color: #0f172a;
       padding-bottom: 40px;
     }
 
-    .header {
+    .top-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       padding: 4px 2px;
     }
 
-    .back-btn {
-      font-size: 22px;
-      font-weight: 600;
-      color: #374151;
-      cursor: pointer;
-    }
-
-    .app-icon {
-      width: 38px;
-      height: 38px;
-      background: #5b758c;
-      color: #ffffff;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      font-size: 19px;
+    .top-header h1 {
+      font-size: 20px;
       font-weight: 700;
       margin: 0;
-      color: #111827;
+      color: #0f172a;
+    }
+
+    .refresh-btn {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0284c7;
+      background: #e0f2fe;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
     }
 
     .card {
       background: #ffffff;
       border-radius: 16px;
-      padding: 16px 18px;
-      margin-bottom: 12px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-      border: 1px solid #e5e7eb;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
     }
 
-    .row {
+    .status-card-row {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
     }
 
-    .status-text {
+    .status-info {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 15px;
-      color: #16a34a;
+      gap: 14px;
     }
 
-    .status-badge {
-      width: 20px;
-      height: 20px;
-      background: #22c55e;
-      color: white;
+    .status-icon-bubble {
+      width: 42px;
+      height: 42px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: 50%;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 18px;
+    }
+
+    .status-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+
+    .status-sub {
       font-size: 12px;
+      color: #64748b;
+      line-height: 1.3;
+    }
+
+    .helper-text {
+      text-align: center;
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 16px;
+      padding: 0 10px;
+    }
+
+    .empty-config {
+      text-align: center;
+      padding: 24px 0 16px;
+    }
+
+    .empty-config-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .empty-config-title {
+      font-weight: 600;
+      font-size: 16px;
+      color: #334155;
+      margin-bottom: 4px;
+    }
+
+    .empty-config-sub {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .btn-main {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+      transition: background 0.2s;
+      margin-bottom: 14px;
+    }
+
+    .btn-main:active {
+      background: #0369a1;
+    }
+
+    .btn-send-campaign {
+      background: #16a34a;
+      box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+    }
+
+    #configFormContainer {
+      display: none;
     }
 
     label {
       display: block;
       font-size: 12px;
-      color: #6b7280;
+      color: #64748b;
       margin-bottom: 6px;
       font-weight: 500;
     }
@@ -110,18 +169,96 @@
       width: 100%;
       border: none;
       outline: none;
-      font-size: 15px;
-      color: #111827;
+      font-size: 14px;
+      color: #0f172a;
       background: transparent;
       padding: 2px 0;
     }
 
     textarea {
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      font-size: 13px;
-      line-height: 1.45;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.4;
       resize: vertical;
-      min-height: 85px;
+      min-height: 70px;
+    }
+
+    .divider-input {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      margin-top: 10px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #334151;
+    }
+
+    .record-item {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .record-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .record-icon {
+      font-size: 16px;
+      margin-top: 2px;
+    }
+
+    .record-sender {
+      font-weight: 700;
+      font-size: 14px;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+
+    .record-body {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.3;
+      max-width: 220px;
+      word-break: break-word;
+    }
+
+    .record-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .record-time {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    .empty-records-msg {
+      text-align: center;
+      padding: 24px;
+      color: #64748b;
+      font-size: 13px;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
     }
 
     .switch {
@@ -132,395 +269,285 @@
       flex-shrink: 0;
     }
 
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
+    .switch input { opacity: 0; width: 0; height: 0; }
 
     .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #cbd5e1;
-      transition: 0.25s;
-      border-radius: 28px;
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1; transition: 0.25s; border-radius: 28px;
     }
 
     .slider:before {
-      position: absolute;
-      content: "";
-      height: 22px;
-      width: 22px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: 0.25s;
-      border-radius: 50%;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px;
+      background-color: white; transition: 0.25s; border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
 
-    input:checked + .slider {
-      background-color: #0b5ed7;
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(22px);
-    }
-
-    .filter-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      font-size: 15px;
-      color: #374151;
-      margin-bottom: 14px;
-    }
-
-    .sub-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 14px;
-      margin-bottom: 14px;
-      border-bottom: 1px solid #f3f4f6;
-    }
-
-    .sub-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #16a34a;
-    }
-
-    .divider-input {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid #f3f4f6;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 14px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: opacity 0.2s;
-    }
-
-    .btn:active {
-      opacity: 0.8;
-    }
-
-    .btn-primary {
-      background: #0b5ed7;
-      color: #ffffff;
-    }
-
-    .btn-secondary {
-      background: #e5e7eb;
-      color: #1f2937;
-    }
-
-    .log-container {
-      margin-top: 16px;
-      background: #111827;
-      border-radius: 14px;
-      padding: 14px;
-      color: #10b981;
-      font-family: monospace;
-      font-size: 12px;
-    }
-
-    .log-title {
-      color: #9ca3af;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .log-box {
-      max-height: 150px;
-      overflow-y: auto;
-      line-height: 1.5;
-    }
-
-    .clear-btn {
-      color: #60a5fa;
-      cursor: pointer;
-      text-decoration: underline;
-    }
+    input:checked + .slider { background-color: #0284c7; }
+    input:checked + .slider:before { transform: translateX(22px); }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <div class="header">
-    <div class="back-btn">‹</div>
-    <div class="app-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/>
-        <path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/>
-        <path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/>
-      </svg>
+  <!-- Top Header -->
+  <div class="top-header">
+    <h1>SMS Forwarder</h1>
+    <button class="refresh-btn" onclick="fetchRecordsFromFirebase()">↻ Sync DB</button>
+  </div>
+
+  <!-- Status / Pause Card -->
+  <div class="card">
+    <div class="status-card-row">
+      <div class="status-info">
+        <div class="status-icon-bubble">💬</div>
+        <div>
+          <div class="status-title" id="statusTitle">Paused</div>
+          <div class="status-sub" id="statusSub">Enable to listen for SMS, keeps running after exit</div>
+        </div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="enabled" onchange="toggleAppStatus()">
+        <span class="slider"></span>
+      </label>
     </div>
-    <h1>Edit Webhook</h1>
   </div>
 
-  <!-- Enabled Switch -->
-  <div class="card row">
-    <div class="status-text" id="statusLabel">
-      <span class="status-badge" id="statusBadge">✓</span>
-      <span id="statusWord">Enabled</span>
+  <div class="helper-text">
+    After enabling, received SMS will be forwarded to your configured Firebase database
+  </div>
+
+  <!-- Empty State Box -->
+  <div id="emptyStateBox" class="card empty-config">
+    <div class="empty-config-icon">⚙️</div>
+    <div class="empty-config-title">Database Configuration</div>
+    <div class="empty-config-sub">Tap Add Forward below to view or edit Firebase URL</div>
+  </div>
+
+  <button class="btn-main" id="actionToggleBtn" onclick="toggleConfigForm()">Add Forward</button>
+
+  <!-- Collapsible Configuration Form -->
+  <div id="configFormContainer">
+    <div class="card">
+      <label for="customFirebaseUrl">Firebase Database RTDB URL <span class="req">*</span></label>
+      <input type="url" id="customFirebaseUrl" value="https://sms-da303-default-rtdb.firebaseio.com/messages.json">
+      
+      <div class="divider-input">
+        <label for="customFirebaseSecret">Auth Token / Secret (Optional)</label>
+        <input type="text" id="customFirebaseSecret" placeholder="Leave blank if public">
+      </div>
     </div>
-    <label class="switch">
-      <input type="checkbox" id="enabled" checked onchange="updateStatusUI()">
-      <span class="slider"></span>
-    </label>
-  </div>
 
-  <!-- Name -->
-  <div class="card">
-    <label for="name">Name</label>
-    <input type="text" id="name" value="Firebase SMS" placeholder="e.g. Firebase SMS">
-  </div>
+    <div class="card">
+      <label for="name">Name</label>
+      <input type="text" id="name" value="Firebase SMS" placeholder="Optional name">
+    </div>
 
-  <!-- Webhook URL (Pre-filled with your Firebase RTDB endpoint) -->
-  <div class="card">
-    <label for="url">URL <span class="req">*</span></label>
-    <input type="url" id="url" value="https://sms-da303-default-rtdb.firebaseio.com/messages.json" placeholder="https://sms-da303-default-rtdb.firebaseio.com/messages.json">
-  </div>
+    <div class="card">
+      <label for="method">HTTP Method <span class="req">*</span></label>
+      <select id="method">
+        <option value="POST" selected>POST</option>
+        <option value="PUT">PUT</option>
+      </select>
+    </div>
 
-  <!-- HTTP Method -->
-  <div class="card">
-    <label for="method">HTTP Method <span class="req">*</span></label>
-    <select id="method">
-      <option value="POST" selected>POST</option>
-      <option value="PUT">PUT</option>
-      <option value="PATCH">PATCH</option>
-    </select>
-  </div>
-
-  <!-- Headers -->
-  <div class="card">
-    <label for="headers">Headers</label>
-    <textarea id="headers" rows="2">{"Content-Type": "application/json"}</textarea>
-  </div>
-
-  <!-- Body Template -->
-  <div class="card">
-    <label for="bodyTemplate">Body Template (Variables: {{sender}}, {{body}}, {{time}})</label>
-    <textarea id="bodyTemplate" rows="5">{
+    <div class="card">
+      <label for="bodyTemplate">Body Template</label>
+      <textarea id="bodyTemplate" rows="3">{
   "sender": "{{sender}}",
   "message": "{{body}}",
   "timestamp": "{{time}}"
 }</textarea>
+    </div>
+
+    <button class="btn-main" onclick="saveAndApplyConfig()">Save & Load Database</button>
   </div>
 
-  <!-- Filter (Optional) -->
-  <div class="card">
-    <div class="filter-header">
-      <span>☰</span>
-      <span>Filter (Optional)</span>
-    </div>
+  <!-- Redirect Button to Send Campaign -->
+  <button class="btn-main btn-send-campaign" onclick="location.href='send.html'">📤 Go to Send SMS Campaign</button>
 
-    <div class="sub-row">
-      <span class="sub-label">Forward when matched</span>
-      <label class="switch">
-        <input type="checkbox" id="filterEnabled">
-        <span class="slider"></span>
-      </label>
-    </div>
-
-    <div>
-      <label for="senderFilter">Sender Filter (comma-separated, e.g. CBE, Telebirr)</label>
-      <input type="text" id="senderFilter" placeholder="Filter sender number or name">
-    </div>
-
-    <div class="divider-input">
-      <label for="contentFilter">Content Filter (keyword or regex)</label>
-      <input type="text" id="contentFilter" placeholder="Filter keyword or regex">
-    </div>
+  <!-- Live Database Records Section (Zero Mock Data) -->
+  <div class="section-header">
+    <div class="section-title">Forward Records (Live DB)</div>
   </div>
-
-  <!-- Buttons -->
-  <button class="btn btn-primary" onclick="saveConfig()">Save Webhook</button>
-  <button class="btn btn-secondary" onclick="testWebhook()">Test Webhook (Simulate SMS)</button>
-
-  <!-- Logs -->
-  <div class="log-container">
-    <div class="log-title">
-      <span>Live Activity Log</span>
-      <span class="clear-btn" onclick="clearLogs()">Clear</span>
-    </div>
-    <div class="log-box" id="logs">Initializing...</div>
+  
+  <div id="recordsList">
+    <div class="empty-records-msg">Connecting to Firebase database...</div>
   </div>
 
   <script>
-    const DEFAULT_FIREBASE_URL = "https://sms-da303-default-rtdb.firebaseio.com/messages.json";
-
-    const FIELD_IDS = [
-      'enabled', 'name', 'url', 'method',
-      'headers', 'bodyTemplate', 'filterEnabled',
-      'senderFilter', 'contentFilter'
-    ];
+    const DEFAULT_DB_URL = "https://sms-da303-default-rtdb.firebaseio.com/messages.json";
+    const FIELD_IDS = ['enabled', 'name', 'method', 'bodyTemplate', 'customFirebaseUrl', 'customFirebaseSecret'];
 
     window.addEventListener('DOMContentLoaded', () => {
       loadConfig();
-      updateStatusUI();
-      log("Connected to: " + document.getElementById('url').value);
+      updateUIState();
+      fetchRecordsFromFirebase();
     });
 
-    function updateStatusUI() {
+    function getActiveFirebaseUrl() {
+      const baseUrl = document.getElementById('customFirebaseUrl').value.trim() || DEFAULT_DB_URL;
+      const secret = document.getElementById('customFirebaseSecret').value.trim();
+      if (!secret) return baseUrl;
+      const separator = baseUrl.includes('?') ? '&' : '?';
+      return `${baseUrl}${separator}auth=${secret}`;
+    }
+
+    function toggleConfigForm() {
+      const box = document.getElementById('configFormContainer');
+      const btn = document.getElementById('actionToggleBtn');
+      if (box.style.display === 'block') {
+        box.style.display = 'none';
+        btn.textContent = 'Add Forward';
+      } else {
+        box.style.display = 'block';
+        btn.textContent = 'Hide Configuration';
+      }
+    }
+
+    function toggleAppStatus() {
+      saveConfig();
+      updateUIState();
+    }
+
+    function updateUIState() {
       const isEnabled = document.getElementById('enabled').checked;
-      const word = document.getElementById('statusWord');
-      const badge = document.getElementById('statusBadge');
-      const label = document.getElementById('statusLabel');
+      const title = document.getElementById('statusTitle');
+      const sub = document.getElementById('statusSub');
+      const emptyBox = document.getElementById('emptyStateBox');
 
       if (isEnabled) {
-        word.textContent = "Enabled";
-        badge.textContent = "✓";
-        badge.style.background = "#22c55e";
-        label.style.color = "#16a34a";
+        title.textContent = "Active & Running";
+        sub.textContent = "Listening for incoming SMS messages...";
+        emptyBox.style.display = 'none';
       } else {
-        word.textContent = "Disabled";
-        badge.textContent = "✕";
-        badge.style.background = "#9ca3af";
-        label.style.color = "#6b7280";
+        title.textContent = "Paused";
+        sub.textContent = "Enable to listen for SMS, keeps running after exit";
+        emptyBox.style.display = 'block';
       }
+    }
+
+    function saveAndApplyConfig() {
+      saveConfig();
+      toggleConfigForm();
+      fetchRecordsFromFirebase();
     }
 
     function saveConfig() {
       FIELD_IDS.forEach(id => {
         const el = document.getElementById(id);
-        const val = el.type === 'checkbox' ? el.checked : el.value;
-        localStorage.setItem('sms_wh_' + id, val);
+        if (el) {
+          const val = el.type === 'checkbox' ? el.checked : el.value;
+          localStorage.setItem('sms_app_' + id, val);
+        }
       });
-      log("✔ Configuration saved locally.");
     }
 
     function loadConfig() {
       FIELD_IDS.forEach(id => {
-        const saved = localStorage.getItem('sms_wh_' + id);
+        const saved = localStorage.getItem('sms_app_' + id);
         if (saved !== null) {
           const el = document.getElementById(id);
-          if (el.type === 'checkbox') {
-            el.checked = (saved === 'true');
-          } else {
-            el.value = saved;
+          if (el) {
+            if (el.type === 'checkbox') el.checked = (saved === 'true');
+            else el.value = saved;
           }
         }
       });
-
-      if (!document.getElementById('url').value.trim()) {
-        document.getElementById('url').value = DEFAULT_FIREBASE_URL;
+      if (!document.getElementById('customFirebaseUrl').value.trim()) {
+        document.getElementById('customFirebaseUrl').value = DEFAULT_DB_URL;
       }
     }
 
-    function log(message) {
-      const box = document.getElementById('logs');
-      const now = new Date().toLocaleTimeString();
-      box.innerHTML = `[${now}] ${message}<br>` + box.innerHTML;
-    }
+    // Fetch real records directly from Firebase Realtime Database
+    async function fetchRecordsFromFirebase() {
+      const listContainer = document.getElementById('recordsList');
+      const url = getActiveFirebaseUrl();
 
-    function clearLogs() {
-      document.getElementById('logs').innerHTML = "Logs cleared.";
-    }
-
-    // Core Webhook Execution Function (Called by Android Native Bridge or Test Button)
-    window.onSmsReceived = async function(sender, body) {
-      const enabled = document.getElementById('enabled').checked;
-      if (!enabled) {
-        log(`Ignored SMS from ${sender} (Webhook is Disabled).`);
-        return;
-      }
-
-      const filterEnabled = document.getElementById('filterEnabled').checked;
-      const senderFilter = document.getElementById('senderFilter').value.trim();
-      const contentFilter = document.getElementById('contentFilter').value.trim();
-
-      if (filterEnabled) {
-        if (senderFilter) {
-          const allowedSenders = senderFilter.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-          const senderMatch = allowedSenders.some(s => sender.toLowerCase().includes(s));
-          if (!senderMatch) {
-            log(`Skipped SMS from "${sender}" (Sender filter mismatch).`);
-            return;
-          }
-        }
-
-        if (contentFilter) {
-          try {
-            const regex = new RegExp(contentFilter, 'i');
-            if (!regex.test(body)) {
-              log(`Skipped SMS from "${sender}" (Content filter mismatch).`);
-              return;
-            }
-          } catch (e) {
-            if (!body.toLowerCase().includes(contentFilter.toLowerCase())) {
-              log(`Skipped SMS from "${sender}" (Keyword mismatch).`);
-              return;
-            }
-          }
-        }
-      }
-
-      const url = document.getElementById('url').value.trim();
-      if (!url) {
-        log("❌ Error: Please enter a Webhook URL first.");
-        return;
-      }
-
-      const method = document.getElementById('method').value;
-      let headers = { "Content-Type": "application/json" };
+      listContainer.innerHTML = `<div class="empty-records-msg">Loading records from Firebase...</div>`;
 
       try {
-        const rawHeaders = document.getElementById('headers').value.trim();
-        if (rawHeaders) headers = JSON.parse(rawHeaders);
-      } catch (err) {
-        log("❌ Error: Headers must be valid JSON.");
-        return;
+        const response = await fetch(url);
+        if (!response.ok) {
+          listContainer.innerHTML = `<div class="empty-records-msg" style="color:#ef4444;">Database Error (HTTP ${response.status}). Check URL or Auth Token.</div>`;
+          return;
+        }
+
+        const data = await response.json();
+
+        if (!data || typeof data !== 'object') {
+          listContainer.innerHTML = `<div class="empty-records-msg">No SMS records found in Firebase database yet.</div>`;
+          return;
+        }
+
+        // Convert Firebase object keys into an array and reverse to show newest first
+        const entries = Object.entries(data).reverse();
+        listContainer.innerHTML = '';
+
+        entries.forEach(([key, item]) => {
+          const sender = escapeHtml(item.sender || 'Unknown');
+          const message = escapeHtml(item.message || item.body || '');
+          let timeDisplay = '';
+          if (item.timestamp) {
+            const parsedDate = new Date(item.timestamp);
+            timeDisplay = isNaN(parsedDate) ? item.timestamp : parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          }
+
+          const card = document.createElement('div');
+          card.className = 'record-item';
+          card.innerHTML = `
+            <div class="record-left">
+              <div class="record-icon" style="color: #22c55e;">✓</div>
+              <div>
+                <div class="record-sender">${sender}</div>
+                <div class="record-body">${message}</div>
+              </div>
+            </div>
+            <div class="record-right">
+              <div class="record-time">${escapeHtml(timeDisplay)}</div>
+            </div>
+          `;
+          listContainer.appendChild(card);
+        });
+      } catch (error) {
+        listContainer.innerHTML = `<div class="empty-records-msg" style="color:#ef4444;">Network Error: ${escapeHtml(error.message)}</div>`;
       }
+    }
+
+    // Native Bridge Receiver (Posts real incoming SMS to Firebase, then refreshes list)
+    window.onSmsReceived = async function(sender, body) {
+      if (!document.getElementById('enabled').checked) return;
+
+      const url = getActiveFirebaseUrl();
+      if (!url) return;
 
       const safeSender = JSON.stringify(sender).slice(1, -1);
       const safeBody = JSON.stringify(body).slice(1, -1);
       const timestamp = new Date().toISOString();
 
-      let payload = document.getElementById('bodyTemplate').value
+      const payload = document.getElementById('bodyTemplate').value
         .replace(/{{sender}}/g, safeSender)
         .replace(/{{body}}/g, safeBody)
         .replace(/{{time}}/g, timestamp);
 
-      log(`⏳ Sending SMS from "${sender}" to Firebase...`);
-
       try {
-        const response = await fetch(url, {
-          method: method,
-          headers: headers,
+        const res = await fetch(url, {
+          method: document.getElementById('method').value,
+          headers: { "Content-Type": "application/json" },
           body: payload
         });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          log(`✅ Saved to Firebase! ID: ${data.name || 'OK'}`);
-        } else {
-          log(`⚠️ Firebase Error (${response.status}): ${data.error || 'Permission denied'}`);
+        if (res.ok) {
+          await fetchRecordsFromFirebase();
         }
-      } catch (error) {
-        log(`❌ Network Error: ${error.message}`);
+      } catch (err) {
+        console.error("Failed to post SMS to Firebase:", err);
       }
     };
 
-    function testWebhook() {
-      saveConfig();
-      window.onSmsReceived("CBE", "Dear Customer, your account 1000**** has been credited with ETB 2,500.00.");
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
   </script>
 </body>

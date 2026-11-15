@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Send SMS Campaign</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background-color: #f3f4f6;
+      color: #111827;
+      padding-bottom: 40px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding: 4px 2px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .back-btn {
+      font-size: 22px;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .app-icon {
+      width: 38px;
+      height: 38px;
+      background: #0b5ed7;
+      color: #ffffff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 19px;
+      font-weight: 700;
+      margin: 0;
+      color: #111827;
+    }
+
+    .sync-btn {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0b5ed7;
+      background: #dbeafe;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      border: 1px solid #e5e7eb;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .req {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+
+    input[type="url"],
+    textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      color: #111827;
+      background: transparent;
+      padding: 2px 0;
+    }
+
+    textarea {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.45;
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .btn:active {
+      opacity: 0.8;
+    }
+
+    .btn-primary {
+      background: #0b5ed7;
+      color: #ffffff;
+    }
+
+    .btn-primary:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #374151;
+      margin: 18px 0 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .delivery-item {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .delivery-phone {
+      font-weight: 700;
+      font-size: 14px;
+      color: #111827;
+    }
+
+    .delivery-msg {
+      font-size: 12px;
+      color: #6b7280;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-delivered {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .badge-pending {
+      background: #fef9c3;
+      color: #a16207;
+    }
+
+    .badge-failed {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .log-container {
+      margin-top: 16px;
+      background: #111827;
+      border-radius: 14px;
+      padding: 14px;
+      color: #10b981;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .log-title {
+      color: #9ca3af;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .log-box {
+      max-height: 130px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+
+    .clear-btn {
+      color: #60a5fa;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="back-btn" onclick="history.back()">‹</div>
+      <div class="app-icon">📤</div>
+      <h1>Send SMS Campaign</h1>
+    </div>
+    <button class="sync-btn" onclick="checkDeliveryStatuses()">↻ Check Status</button>
+  </div>
+
+  <!-- Firebase Queue URL -->
+  <div class="card">
+    <label for="url">Firebase Send Queue URL <span class="req">*</span></label>
+    <input type="url" id="url" value="https://sms-da303-default-rtdb.firebaseio.com/send_queue.json" placeholder="https://.../send_queue.json">
+  </div>
+
+  <!-- Phone Numbers -->
+  <div class="card">
+    <label for="numbers">Phone Numbers (One number per line)</label>
+    <textarea id="numbers" placeholder="+251911000001&#10;+251911000002"></textarea>
+  </div>
+
+  <!-- Message Body -->
+  <div class="card">
+    <label for="message">Message Text <span class="req">*</span></label>
+    <textarea id="message" rows="3" placeholder="Enter the message you want to send to users..."></textarea>
+  </div>
+
+  <!-- Action Button -->
+  <button class="btn btn-primary" id="sendBtn" onclick="queueBulkSms()">Queue & Send SMS</button>
+
+  <!-- Live Delivery Status Section -->
+  <div class="section-title">
+    <span>SMS Delivery Report</span>
+    <span style="font-size: 11px; color: #6b7280; font-weight: 400;">Auto-updates every 4s</span>
+  </div>
+  <div id="deliveryList">
+    <div class="card" style="text-align: center; color: #6b7280; font-size: 13px;">Loading delivery status from Firebase...</div>
+  </div>
+
+  <!-- Logs -->
+  <div class="log-container">
+    <div class="log-title">
+      <span>Campaign Activity Log</span>
+      <span class="clear-btn" onclick="clearLogs()">Clear</span>
+    </div>
+    <div class="log-box" id="logs">Initializing...</div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      log("Ready. Paste numbers and message, then tap Send.");
+      checkDeliveryStatuses();
+      // Poll Firebase every 4 seconds to check if Android phone delivered the SMS
+      setInterval(checkDeliveryStatuses, 4000);
+    });
+
+    function log(message) {
+      const box = document.getElementById('logs');
+      const now = new Date().toLocaleTimeString();
+      box.innerHTML = `[${now}] ${message}<br>` + box.innerHTML;
+    }
+
+    function clearLogs() {
+      document.getElementById('logs').innerHTML = "Logs cleared.";
+    }
+
+    async function queueBulkSms() {
+      const url = document.getElementById('url').value.trim();
+      const message = document.getElementById('message').value.trim();
+      const rawNumbers = document.getElementById('numbers').value.trim();
+      const sendBtn = document.getElementById('sendBtn');
+
+      if (!url || !message || !rawNumbers) {
+        log("❌ Error: URL, phone numbers, and message are all required.");
+        return;
+      }
+
+      const numbers = rawNumbers.split('\n').map(n => n.trim()).filter(Boolean);
+      if (numbers.length === 0) {
+        log("❌ Error: No valid phone numbers found.");
+        return;
+      }
+
+      sendBtn.disabled = true;
+      log(`⏳ Queuing ${numbers.length} messages to Firebase...`);
+
+      let successCount = 0;
+
+      for (let i = 0; i < numbers.length; i++) {
+        const phone = numbers[i];
+        const payload = {
+          phone: phone,
+          message: message,
+          status: "pending",
+          timestamp: new Date().toISOString()
+        };
+
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          if (response.ok) {
+            successCount++;
+            log(`✔ [${successCount}/${numbers.length}] Queued for: ${phone}`);
+          } else {
+            log(`⚠️ Failed to queue for ${phone} (HTTP ${response.status})`);
+          }
+        } catch (error) {
+          log(`❌ Network error for ${phone}: ${error.message}`);
+        }
+
+        await new Promise(r => setTimeout(r, 100));
+      }
+
+      log(`🎉 Queued ${successCount}/${numbers.length}. Waiting for phone SIM to deliver...`);
+      sendBtn.disabled = false;
+      checkDeliveryStatuses();
+    }
+
+    // Read Firebase send_queue to verify which messages were delivered or not
+    async function checkDeliveryStatuses() {
+      const url = document.getElementById('url').value.trim();
+      const listContainer = document.getElementById('deliveryList');
+      if (!url) return;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (!data || typeof data !== 'object') {
+          listContainer.innerHTML = `<div class="card" style="text-align: center; color: #6b7280; font-size: 13px;">No queued SMS found in database.</div>`;
+          return;
+        }
+
+        const items = Object.entries(data).reverse();
+        listContainer.innerHTML = '';
+
+        items.forEach(([key, item]) => {
+          const phone = escapeHtml(item.phone || 'Unknown');
+          const msg = escapeHtml(item.message || '');
+          const status = (item.status || 'pending').toLowerCase();
+
+          let badgeClass = 'badge-pending';
+          let statusLabel = 'Not Delivered (Pending)';
+
+          if (status === 'delivered' || status === 'sent') {
+            badgeClass = 'badge-delivered';
+            statusLabel = '✓ Delivered';
+          } else if (status === 'failed' || status === 'error') {
+            badgeClass = 'badge-failed';
+            statusLabel = '✕ Not Delivered (Failed)';
+          }
+
+          const row = document.createElement('div');
+          row.className = 'delivery-item';
+          row.innerHTML = `
+            <div>
+              <div class="delivery-phone">${phone}</div>
+              <div class="delivery-msg">${msg}</div>
+            </div>
+            <span class="badge ${badgeClass}">${statusLabel}</span>
+          `;
+          listContainer.appendChild(row);
+        });
+      } catch (err) {
+        console.error("Status check error:", err);
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
