@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Edit Webhook</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background-color: #f3f4f6;
+      color: #111827;
+      padding-bottom: 40px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding: 4px 2px;
+    }
+
+    .back-btn {
+      font-size: 22px;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .app-icon {
+      width: 38px;
+      height: 38px;
+      background: #5b758c;
+      color: #ffffff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 19px;
+      font-weight: 700;
+      margin: 0;
+      color: #111827;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      border: 1px solid #e5e7eb;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-text {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #16a34a;
+    }
+
+    .status-badge {
+      width: 20px;
+      height: 20px;
+      background: #22c55e;
+      color: white;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .req {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    select,
+    textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      color: #111827;
+      background: transparent;
+      padding: 2px 0;
+    }
+
+    textarea {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.45;
+      resize: vertical;
+      min-height: 85px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: 0.25s;
+      border-radius: 28px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    input:checked + .slider {
+      background-color: #0b5ed7;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .filter-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #374151;
+      margin-bottom: 14px;
+    }
+
+    .sub-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .sub-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #16a34a;
+    }
+
+    .divider-input {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f3f4f6;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .btn:active {
+      opacity: 0.8;
+    }
+
+    .btn-primary {
+      background: #0b5ed7;
+      color: #ffffff;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #1f2937;
+    }
+
+    .log-container {
+      margin-top: 16px;
+      background: #111827;
+      border-radius: 14px;
+      padding: 14px;
+      color: #10b981;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .log-title {
+      color: #9ca3af;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .log-box {
+      max-height: 150px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+
+    .clear-btn {
+      color: #60a5fa;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="back-btn">‹</div>
+    <div class="app-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/>
+        <path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/>
+        <path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/>
+      </svg>
+    </div>
+    <h1>Edit Webhook</h1>
+  </div>
+
+  <!-- Enabled Switch -->
+  <div class="card row">
+    <div class="status-text" id="statusLabel">
+      <span class="status-badge" id="statusBadge">✓</span>
+      <span id="statusWord">Enabled</span>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="enabled" checked onchange="updateStatusUI()">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <!-- Name -->
+  <div class="card">
+    <label for="name">Name</label>
+    <input type="text" id="name" value="Firebase SMS" placeholder="e.g. Firebase SMS">
+  </div>
+
+  <!-- Webhook URL (Pre-filled with your Firebase RTDB endpoint) -->
+  <div class="card">
+    <label for="url">URL <span class="req">*</span></label>
+    <input type="url" id="url" value="https://sms-da303-default-rtdb.firebaseio.com/messages.json" placeholder="https://sms-da303-default-rtdb.firebaseio.com/messages.json">
+  </div>
+
+  <!-- HTTP Method -->
+  <div class="card">
+    <label for="method">HTTP Method <span class="req">*</span></label>
+    <select id="method">
+      <option value="POST" selected>POST</option>
+      <option value="PUT">PUT</option>
+      <option value="PATCH">PATCH</option>
+    </select>
+  </div>
+
+  <!-- Headers -->
+  <div class="card">
+    <label for="headers">Headers</label>
+    <textarea id="headers" rows="2">{"Content-Type": "application/json"}</textarea>
+  </div>
+
+  <!-- Body Template -->
+  <div class="card">
+    <label for="bodyTemplate">Body Template (Variables: {{sender}}, {{body}}, {{time}})</label>
+    <textarea id="bodyTemplate" rows="5">{
+  "sender": "{{sender}}",
+  "message": "{{body}}",
+  "timestamp": "{{time}}"
+}</textarea>
+  </div>
+
+  <!-- Filter (Optional) -->
+  <div class="card">
+    <div class="filter-header">
+      <span>☰</span>
+      <span>Filter (Optional)</span>
+    </div>
+
+    <div class="sub-row">
+      <span class="sub-label">Forward when matched</span>
+      <label class="switch">
+        <input type="checkbox" id="filterEnabled">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div>
+      <label for="senderFilter">Sender Filter (comma-separated, e.g. CBE, Telebirr)</label>
+      <input type="text" id="senderFilter" placeholder="Filter sender number or name">
+    </div>
+
+    <div class="divider-input">
+      <label for="contentFilter">Content Filter (keyword or regex)</label>
+      <input type="text" id="contentFilter" placeholder="Filter keyword or regex">
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <button class="btn btn-primary" onclick="saveConfig()">Save Webhook</button>
+  <button class="btn btn-secondary" onclick="testWebhook()">Test Webhook (Simulate SMS)</button>
+
+  <!-- Logs -->
+  <div class="log-container">
+    <div class="log-title">
+      <span>Live Activity Log</span>
+      <span class="clear-btn" onclick="clearLogs()">Clear</span>
+    </div>
+    <div class="log-box" id="logs">Initializing...</div>
+  </div>
+
+  <script>
+    const DEFAULT_FIREBASE_URL = "https://sms-da303-default-rtdb.firebaseio.com/messages.json";
+
+    const FIELD_IDS = [
+      'enabled', 'name', 'url', 'method',
+      'headers', 'bodyTemplate', 'filterEnabled',
+      'senderFilter', 'contentFilter'
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadConfig();
+      updateStatusUI();
+      log("Connected to: " + document.getElementById('url').value);
+    });
+
+    function updateStatusUI() {
+      const isEnabled = document.getElementById('enabled').checked;
+      const word = document.getElementById('statusWord');
+      const badge = document.getElementById('statusBadge');
+      const label = document.getElementById('statusLabel');
+
+      if (isEnabled) {
+        word.textContent = "Enabled";
+        badge.textContent = "✓";
+        badge.style.background = "#22c55e";
+        label.style.color = "#16a34a";
+      } else {
+        word.textContent = "Disabled";
+        badge.textContent = "✕";
+        badge.style.background = "#9ca3af";
+        label.style.color = "#6b7280";
+      }
+    }
+
+    function saveConfig() {
+      FIELD_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        const val = el.type === 'checkbox' ? el.checked : el.value;
+        localStorage.setItem('sms_wh_' + id, val);
+      });
+      log("✔ Configuration saved locally.");
+    }
+
+    function loadConfig() {
+      FIELD_IDS.forEach(id => {
+        const saved = localStorage.getItem('sms_wh_' + id);
+        if (saved !== null) {
+          const el = document.getElementById(id);
+          if (el.type === 'checkbox') {
+            el.checked = (saved === 'true');
+          } else {
+            el.value = saved;
+          }
+        }
+      });
+
+      if (!document.getElementById('url').value.trim()) {
+        document.getElementById('url').value = DEFAULT_FIREBASE_URL;
+      }
+    }
+
+    function log(message) {
+      const box = document.getElementById('logs');
+      const now = new Date().toLocaleTimeString();
+      box.innerHTML = `[${now}] ${message}<br>` + box.innerHTML;
+    }
+
+    function clearLogs() {
+      document.getElementById('logs').innerHTML = "Logs cleared.";
+    }
+
+    // Core Webhook Execution Function (Called by Android Native Bridge or Test Button)
+    window.onSmsReceived = async function(sender, body) {
+      const enabled = document.getElementById('enabled').checked;
+      if (!enabled) {
+        log(`Ignored SMS from ${sender} (Webhook is Disabled).`);
+        return;
+      }
+
+      const filterEnabled = document.getElementById('filterEnabled').checked;
+      const senderFilter = document.getElementById('senderFilter').value.trim();
+      const contentFilter = document.getElementById('contentFilter').value.trim();
+
+      if (filterEnabled) {
+        if (senderFilter) {
+          const allowedSenders = senderFilter.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+          const senderMatch = allowedSenders.some(s => sender.toLowerCase().includes(s));
+          if (!senderMatch) {
+            log(`Skipped SMS from "${sender}" (Sender filter mismatch).`);
+            return;
+          }
+        }
+
+        if (contentFilter) {
+          try {
+            const regex = new RegExp(contentFilter, 'i');
+            if (!regex.test(body)) {
+              log(`Skipped SMS from "${sender}" (Content filter mismatch).`);
+              return;
+            }
+          } catch (e) {
+            if (!body.toLowerCase().includes(contentFilter.toLowerCase())) {
+              log(`Skipped SMS from "${sender}" (Keyword mismatch).`);
+              return;
+            }
+          }
+        }
+      }
+
+      const url = document.getElementById('url').value.trim();
+      if (!url) {
+        log("❌ Error: Please enter a Webhook URL first.");
+        return;
+      }
+
+      const method = document.getElementById('method').value;
+      let headers = { "Content-Type": "application/json" };
+
+      try {
+        const rawHeaders = document.getElementById('headers').value.trim();
+        if (rawHeaders) headers = JSON.parse(rawHeaders);
+      } catch (err) {
+        log("❌ Error: Headers must be valid JSON.");
+        return;
+      }
+
+      const safeSender = JSON.stringify(sender).slice(1, -1);
+      const safeBody = JSON.stringify(body).slice(1, -1);
+      const timestamp = new Date().toISOString();
+
+      let payload = document.getElementById('bodyTemplate').value
+        .replace(/{{sender}}/g, safeSender)
+        .replace(/{{body}}/g, safeBody)
+        .replace(/{{time}}/g, timestamp);
+
+      log(`⏳ Sending SMS from "${sender}" to Firebase...`);
+
+      try {
+        const response = await fetch(url, {
+          method: method,
+          headers: headers,
+          body: payload
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          log(`✅ Saved to Firebase! ID: ${data.name || 'OK'}`);
+        } else {
+          log(`⚠️ Firebase Error (${response.status}): ${data.error || 'Permission denied'}`);
+        }
+      } catch (error) {
+        log(`❌ Network Error: ${error.message}`);
+      }
+    };
+
+    function testWebhook() {
+      saveConfig();
+      window.onSmsReceived("CBE", "Dear Customer, your account 1000**** has been credited with ETB 2,500.00.");
+    }
+  </script>
+</body>
+</html>
