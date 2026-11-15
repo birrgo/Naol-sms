@@ -24,27 +24,52 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Prepare Web Directory & Dependencies
+      - name: Prepare Web Directory, Logo & Dependencies
         run: |
           npm install
-          # Ensure 'www' folder exists and index.html is placed inside it
           mkdir -p www
           if [ -f "index.html" ]; then
             cp index.html www/index.html
           fi
-          # Initialize Capacitor with valid 'www' web directory
+          if [ -f "send.html" ]; then
+            cp send.html www/send.html
+          fi
+          
           npx cap init "Naol SMS" "com.naol.smsforwarder" --web-dir www
           npx cap add android
+
+          # Inject custom app logo s.png if present in repository root
+          if [ -f "s.png" ]; then
+            echo "Custom app logo s.png found. Configuring app icons..."
+            RES_DIR="android/app/src/main/res"
+            for size in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+              case $size in
+                mdpi) px=48 ;;
+                hdpi) px=72 ;;
+                xhdpi) px=96 ;;
+                xxhdpi) px=144 ;;
+                xxxhdpi) px=192 ;;
+              esac
+              mkdir -p "$RES_DIR/mipmap-$size"
+              if command -v convert &> /dev/null; then
+                convert s.png -resize ${px}x${px}! "$RES_DIR/mipmap-$size/ic_launcher.png"
+                convert s.png -resize ${px}x${px}! "$RES_DIR/mipmap-$size/ic_launcher_round.png"
+              else
+                cp s.png "$RES_DIR/mipmap-$size/ic_launcher.png"
+                cp s.png "$RES_DIR/mipmap-$size/ic_launcher_round.png"
+              fi
+            done
+          fi
 
       - name: Sync Android
         run: |
           npx cap sync android
 
-      - name: Inject Native SMS Permissions & Java Bridge
+      - name: Inject Native SMS Permissions & Dual-SIM Java Bridge
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           
-          sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.RECEIVE_SMS" />\n    <uses-permission android:name="android.permission.READ_SMS" />|' $MANIFEST
+          sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.RECEIVE_SMS" />\n    <uses-permission android:name="android.permission.READ_SMS" />\n    <uses-permission android:name="android.permission.SEND_SMS" />\n    <uses-permission android:name="android.permission.READ_PHONE_STATE" />|' $MANIFEST
 
           RECEIVER_XML='<receiver android:name=".SmsReceiver" android:exported="true" android:permission="android.permission.BROADCAST_SMS"><intent-filter android:priority="999"><action android:name="android.provider.Telephony.SMS_RECEIVED" /></intent-filter></receiver>'
           sed -i "s|</application>|${RECEIVER_XML}\n</application>|" $MANIFEST
@@ -88,12 +113,25 @@ jobs:
           package com.naol.smsforwarder;
 
           import android.Manifest;
+          import android.app.Activity;
+          import android.app.PendingIntent;
+          import android.content.BroadcastReceiver;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.IntentFilter;
           import android.content.pm.PackageManager;
+          import android.os.Build;
           import android.os.Bundle;
+          import android.telephony.SmsManager;
+          import android.telephony.SubscriptionInfo;
+          import android.telephony.SubscriptionManager;
+          import android.webkit.JavascriptInterface;
           import androidx.core.app.ActivityCompat;
           import androidx.core.content.ContextCompat;
           import com.getcapacitor.BridgeActivity;
           import org.json.JSONObject;
+          import java.util.ArrayList;
+          import java.util.List;
 
           public class MainActivity extends BridgeActivity {
               private static MainActivity instance;
@@ -102,8 +140,17 @@ jobs:
               public void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   instance = this;
-                  if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
-                      ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS}, 101);
+
+                  String[] perms = new String[]{
+                      Manifest.permission.RECEIVE_SMS,
+                      Manifest.permission.READ_SMS,
+                      Manifest.permission.SEND_SMS,
+                      Manifest.permission.READ_PHONE_STATE
+                  };
+                  ActivityCompat.requestPermissions(this, perms, 101);
+
+                  if (getBridge() != null && getBridge().getWebView() != null) {
+                      getBridge().getWebView().addJavascriptInterface(new SmsJsBridge(this), "NaolSmsBridge");
                   }
               }
 
@@ -113,6 +160,90 @@ jobs:
                       String safeBody = JSONObject.quote(body);
                       String js = "if(window.onSmsReceived){ window.onSmsReceived(" + safeSender + ", " + safeBody + "); }";
                       instance.runOnUiThread(() -> instance.getBridge().getWebView().evaluateJavascript(js, null));
+                  }
+              }
+
+              public static void notifySmsStatus(String queueId, String status) {
+                  if (instance != null && instance.getBridge() != null) {
+                      String safeId = JSONObject.quote(queueId);
+                      String safeStatus = JSONObject.quote(status);
+                      String js = "if(window.onSmsStatusUpdate){ window.onSmsStatusUpdate(" + safeId + ", " + safeStatus + "); }";
+                      instance.runOnUiThread(() -> instance.getBridge().getWebView().evaluateJavascript(js, null));
+                  }
+              }
+
+              public class SmsJsBridge {
+                  Context context;
+
+                  SmsJsBridge(Context ctx) {
+                      this.context = ctx;
+                  }
+
+                  @JavascriptInterface
+                  public void sendSms(String queueId, String phoneNumber, String message, int simSlotIndex) {
+                      try {
+                          if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                              notifySmsStatus(queueId, "failed");
+                              return;
+                          }
+
+                          SmsManager smsManager = SmsManager.getDefault();
+                          if (simSlotIndex >= 0 && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                              SubscriptionManager subManager = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+                              if (subManager != null) {
+                                  List<SubscriptionInfo> activeSubs = subManager.getActiveSubscriptionInfoList();
+                                  if (activeSubs != null && activeSubs.size() > simSlotIndex) {
+                                      int subId = activeSubs.get(simSlotIndex).getSubscriptionId();
+                                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                          smsManager = context.getSystemService(SmsManager.class).createForSubscriptionId(subId);
+                                      } else {
+                                          smsManager = SmsManager.getSmsManagerForSubscriptionId(subId);
+                                      }
+                                  }
+                              }
+                          }
+
+                          String sentAction = "SMS_SENT_" + queueId;
+                          PendingIntent sentPI = PendingIntent.getBroadcast(
+                              context,
+                              queueId.hashCode(),
+                              new Intent(sentAction),
+                              PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                          );
+
+                          BroadcastReceiver sentReceiver = new BroadcastReceiver() {
+                              @Override
+                              public void onReceive(Context c, Intent intent) {
+                                  if (getResultCode() == Activity.RESULT_OK) {
+                                      notifySmsStatus(queueId, "delivered");
+                                  } else {
+                                      notifySmsStatus(queueId, "failed");
+                                  }
+                                  try {
+                                      context.unregisterReceiver(this);
+                                  } catch (Exception ignored) {}
+                              }
+                          };
+
+                          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                              context.registerReceiver(sentReceiver, new IntentFilter(sentAction), Context.RECEIVER_NOT_EXPORTED);
+                          } else {
+                              context.registerReceiver(sentReceiver, new IntentFilter(sentAction));
+                          }
+
+                          ArrayList<String> parts = smsManager.divideMessage(message);
+                          if (parts.size() > 1) {
+                              ArrayList<PendingIntent> sentIntents = new ArrayList<>();
+                              for (int i = 0; i < parts.size(); i++) {
+                                  sentIntents.add(i == 0 ? sentPI : null);
+                              }
+                              smsManager.sendMultipartTextMessage(phoneNumber, null, parts, sentIntents, null);
+                          } else {
+                              smsManager.sendTextMessage(phoneNumber, null, message, sentPI, null);
+                          }
+                      } catch (Exception e) {
+                          notifySmsStatus(queueId, "failed");
+                      }
                   }
               }
           }
